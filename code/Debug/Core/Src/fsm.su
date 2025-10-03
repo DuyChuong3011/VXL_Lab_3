@@ -1,0 +1,4 @@
+fsm.c:6:6:setTrafficLED	24	static
+fsm.c:16:6:display7segment	32	static
+fsm.c:46:6:enterState	32	static
+fsm.c:57:6:fsm_auto_2way_run	32	static

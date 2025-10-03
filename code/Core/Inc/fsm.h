@@ -1,0 +1,8 @@
+#ifndef INC_FSM_H_
+#define INC_FSM_H_
+
+#include "global.h"
+
+void fsm_auto_2way_run();
+
+#endif /* INC_FSM_H_ */

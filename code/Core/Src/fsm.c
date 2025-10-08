@@ -7,6 +7,7 @@ static int blink_state = 0;
 static int mode2_init = 1; // cờ để tắt đèn ngay khi vào MODE_2
 
 int cnt=1;
+int flag=1;
 
 void setTrafficLED(int r1, int g1, int y1, int r2, int g2, int y2) {
     HAL_GPIO_WritePin(GPIOA, RED_1_Pin, (r1 ? GPIO_PIN_SET : GPIO_PIN_RESET));
@@ -59,8 +60,16 @@ void enterState(int new_state, int t1, int t2,
     setTimer1(1000); // 1 giây
 }
 
+void check_button(){
+	if(isButtonPressed()){
+		mode = MODE_1 + flag;
+		flag = (flag+1)%2;
+	}
+}
+
 void mode_normal(){
 	display7segment(1, 2);
+	mode2_init = 1;
 	    if (timer1_flag) {
 	        // Giảm thời gian mỗi giây
 	        if (led1_time > 0) led1_time--;
@@ -124,6 +133,7 @@ void fsm_auto_2way_run() {
 	switch (mode) {
 	case MODE_1:
 		mode_normal();
+		check_button();
 		break;
 	case MODE_2:
 		display7segment(2, 2);
@@ -154,6 +164,7 @@ void fsm_auto_2way_run() {
 
 		    setTimer1(500+cnt); // lặp lại sau 0.5s
 		}
+		check_button();
 	    break;
 	default: break;
 	}

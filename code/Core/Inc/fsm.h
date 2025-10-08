@@ -2,6 +2,7 @@
 #define INC_FSM_H_
 
 #include "global.h"
+#include "button.h"
 
 void fsm_auto_2way_run();
 

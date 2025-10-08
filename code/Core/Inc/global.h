@@ -18,7 +18,11 @@
 #define AUTO_G1_R2 	23
 #define AUTO_Y1_R2	24
 
+#define MODE_1		31
+#define MODE_2		32
+
 extern int status;
+extern int mode;
 
 #endif /* INC_GLOBAL_H_ */
 

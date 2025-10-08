@@ -74,8 +74,6 @@ void Error_Handler(void);
 #define YELLOW_2_GPIO_Port GPIOA
 #define GREEN_2_Pin GPIO_PIN_13
 #define GREEN_2_GPIO_Port GPIOA
-#define SW_1_Pin GPIO_PIN_15
-#define SW_1_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

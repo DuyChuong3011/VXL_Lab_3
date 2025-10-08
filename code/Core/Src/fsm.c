@@ -3,6 +3,11 @@
 int led1_time = 0;
 int led2_time = 0;
 
+static int blink_state = 0;
+static int mode2_init = 1; // cờ để tắt đèn ngay khi vào MODE_2
+
+int cnt=1;
+
 void setTrafficLED(int r1, int g1, int y1, int r2, int g2, int y2) {
     HAL_GPIO_WritePin(GPIOA, RED_1_Pin, (r1 ? GPIO_PIN_SET : GPIO_PIN_RESET));
     HAL_GPIO_WritePin(GPIOA, GREEN_1_Pin, (g1 ? GPIO_PIN_SET : GPIO_PIN_RESET));
@@ -54,65 +59,102 @@ void enterState(int new_state, int t1, int t2,
     setTimer1(1000); // 1 giây
 }
 
+void mode_normal(){
+	display7segment(1, 2);
+	    if (timer1_flag) {
+	        // Giảm thời gian mỗi giây
+	        if (led1_time > 0) led1_time--;
+	        if (led2_time > 0) led2_time--;
+
+	        display7segment(led1_time, 0);
+	        display7segment(led2_time, 1);
+
+	        setTimer1(1000); // lặp lại 1 giây
+	    }
+
+	    switch (status) {
+	    case INIT:
+	        enterState(AUTO_R1_G2, 5, 3,
+	                   GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET,
+	                   GPIO_PIN_SET, GPIO_PIN_RESET, GPIO_PIN_SET);
+	        break;
+
+	    case AUTO_R1_G2:
+	        if (led2_time <= 0) {
+	            enterState(AUTO_R1_Y2, led1_time, 2,
+	                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET,
+	                       GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_RESET);
+	        }
+	        break;
+
+	    case AUTO_R1_Y2:
+	        if (led2_time <= 0) {
+	            enterState(AUTO_G1_R2, 3, 5,
+	                       GPIO_PIN_SET, GPIO_PIN_RESET, GPIO_PIN_SET,
+	                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET);
+	        }
+	        break;
+
+	    case AUTO_G1_R2:
+	        if (led1_time <= 0) {
+	            enterState(AUTO_Y1_R2, 2, led2_time,
+	                       GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_RESET,
+	                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET);
+	        }
+	        break;
+
+	    case AUTO_Y1_R2:
+	        if (led1_time <= 0) {
+	            enterState(AUTO_R1_G2, 5, 3,
+	                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET,
+	                       GPIO_PIN_SET, GPIO_PIN_RESET, GPIO_PIN_SET);
+	        }
+	        break;
+
+	    default:
+	        // fallback an toàn: đưa về INIT nếu giá trị không hợp lệ
+	        enterState(INIT, 0, 0,
+	                   GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET,
+	                   GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET);
+	        break;
+	    }
+}
+
 void fsm_auto_2way_run() {
-     HAL_GPIO_WritePin(GPIOA, SW_1_Pin, GPIO_PIN_SET);
-     display7segment(1, 2);
+	switch (mode) {
+	case MODE_1:
+		mode_normal();
+		break;
+	case MODE_2:
+		display7segment(2, 2);
+		if (mode2_init) {
+		    // Tắt tất cả LED
+		    setTrafficLED(GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET,
+		                  GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET);
 
-    if (timer1_flag) {
-        // Giảm thời gian mỗi giây
-        if (led1_time > 0) led1_time--;
-        if (led2_time > 0) led2_time--;
+		    blink_state = 0;     // 0 = RED1 sáng, RED2 tắt
+		    mode2_init = 0;      // không reset lại nữa
+		    setTimer1(500);      // 0.5s để tạo tần số 2Hz
+		    display7segment(cnt%10, 0);
+		    display7segment(cnt/10, 1);
+		}
 
-        display7segment(led1_time, 0);
-        display7segment(led2_time, 1);
+		if (timer1_flag) {
+		    if (blink_state == 0) {
+		        // RED1 sáng, RED2 tắt
+		        HAL_GPIO_WritePin(GPIOA, RED_1_Pin, GPIO_PIN_RESET);
+		        HAL_GPIO_WritePin(GPIOA, RED_2_Pin, GPIO_PIN_SET);
+		        blink_state = 1;
+		    } else {
+		        // RED1 tắt, RED2 sáng
+		        HAL_GPIO_WritePin(GPIOA, RED_1_Pin, GPIO_PIN_SET);
+		        HAL_GPIO_WritePin(GPIOA, RED_2_Pin, GPIO_PIN_RESET);
+		        blink_state = 0;
+		    }
 
-        setTimer1(1000); // lặp lại 1 giây
-    }
-
-    switch (status) {
-    case INIT:
-        enterState(AUTO_R1_G2, 5, 3,
-                   GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET,
-                   GPIO_PIN_SET, GPIO_PIN_RESET, GPIO_PIN_SET);
-        break;
-
-    case AUTO_R1_G2:
-        if (led2_time <= 0) {
-            enterState(AUTO_R1_Y2, led1_time, 2,
-                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET,
-                       GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_RESET);
-        }
-        break;
-
-    case AUTO_R1_Y2:
-        if (led2_time <= 0) {
-            enterState(AUTO_G1_R2, 3, 5,
-                       GPIO_PIN_SET, GPIO_PIN_RESET, GPIO_PIN_SET,
-                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET);
-        }
-        break;
-
-    case AUTO_G1_R2:
-        if (led1_time <= 0) {
-            enterState(AUTO_Y1_R2, 2, led2_time,
-                       GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_RESET,
-                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET);
-        }
-        break;
-
-    case AUTO_Y1_R2:
-        if (led1_time <= 0) {
-            enterState(AUTO_R1_G2, 5, 3,
-                       GPIO_PIN_RESET, GPIO_PIN_SET, GPIO_PIN_SET,
-                       GPIO_PIN_SET, GPIO_PIN_RESET, GPIO_PIN_SET);
-        }
-        break;
-
-    default:
-        // fallback an toàn: đưa về INIT nếu giá trị không hợp lệ
-        enterState(INIT, 0, 0,
-                   GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET,
-                   GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET);
-        break;
-    }
+		    setTimer1(500+cnt); // lặp lại sau 0.5s
+		}
+	    break;
+	default: break;
+	}
 }

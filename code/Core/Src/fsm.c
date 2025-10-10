@@ -6,8 +6,9 @@ int led2_time = 0;
 static int blink_state = 0;
 static int mode2_init = 1; // cờ để tắt đèn ngay khi vào MODE_2
 
-int cnt=1;
+int cnt=0;
 int flag=1;
+int next=1;
 
 void setTrafficLED(int r1, int g1, int y1, int r2, int g2, int y2) {
     HAL_GPIO_WritePin(GPIOA, RED_1_Pin, (r1 ? GPIO_PIN_SET : GPIO_PIN_RESET));
@@ -65,14 +66,18 @@ void check_button() {
     switch (button_event) {
         case 1:
             // Xử lý khi button 1 được nhấn
-            mode = MODE_1 + flag;
-            flag = (flag + 1) % 2;
+            mode = MODE_1 + next;
+            next = (next + 1) % 2;
             break;
         case 2:
             // Xử lý khi button 2 được nhấn
-            cnt++;
+        	if(flag) cnt++;
             if (cnt > 99) cnt = 0;
             break;
+        case 3:
+			// Xử lý khi button 3 được nhấn
+			flag = (flag+1)%2;
+			break;
         default:
             // Không có nút nào được nhấn, không làm gì cả
             break;

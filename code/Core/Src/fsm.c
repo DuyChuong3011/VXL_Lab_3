@@ -5,6 +5,8 @@ int led2_time = 0;
 
 static int blink_state = 0;
 static int mode2_init = 1; // cờ để tắt đèn ngay khi vào MODE_2
+static int mode3_init = 1; // cờ để tắt đèn ngay khi vào MODE_2
+static int mode4_init = 1; // cờ để tắt đèn ngay khi vào MODE_2
 
 int cnt=0;
 int flag=1;
@@ -67,7 +69,8 @@ void check_button() {
         case 1:
             // Xử lý khi button 1 được nhấn
             mode = MODE_1 + next;
-            next = (next + 1) % 2;
+            next = (next + 1) % 4;
+            cnt =0;
             break;
         case 2:
             // Xử lý khi button 2 được nhấn
@@ -87,6 +90,8 @@ void check_button() {
 void mode_normal(){
 	display7segment(1, 2);
 	mode2_init = 1;
+	mode3_init = 1;
+	mode4_init = 1;
 	    if (timer1_flag) {
 	        // Giảm thời gian mỗi giây
 	        if (led1_time > 0) led1_time--;
@@ -183,6 +188,64 @@ void fsm_auto_2way_run() {
 		}
 		check_button();
 	    break;
+	case MODE_3:
+		display7segment(3, 2);
+		if (mode3_init) {
+			// Tắt tất cả LED
+			setTrafficLED(GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET,
+						  GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET);
+
+			blink_state = 0;
+			mode3_init = 0;
+			setTimer1(500);
+		}
+
+		if (timer1_flag) {
+			display7segment(cnt%10, 0);
+			display7segment(cnt/10, 1);
+			if (blink_state == 0) {
+				HAL_GPIO_WritePin(GPIOA, YELLOW_1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOA, YELLOW_2_Pin, GPIO_PIN_SET);
+				blink_state = 1;
+			} else {
+				HAL_GPIO_WritePin(GPIOA, YELLOW_1_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GPIOA, YELLOW_2_Pin, GPIO_PIN_RESET);
+				blink_state = 0;
+			}
+
+			setTimer1(500+cnt);
+		}
+		check_button();
+		break;
+	case MODE_4:
+		display7segment(4, 2);
+		if (mode4_init) {
+			// Tắt tất cả LED
+			setTrafficLED(GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET,
+						  GPIO_PIN_SET, GPIO_PIN_SET, GPIO_PIN_SET);
+
+			blink_state = 0;
+			mode4_init = 0;
+			setTimer1(500);
+		}
+
+		if (timer1_flag) {
+			display7segment(cnt%10, 0);
+			display7segment(cnt/10, 1);
+			if (blink_state == 0) {
+				HAL_GPIO_WritePin(GPIOA, GREEN_1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOA, GREEN_2_Pin, GPIO_PIN_SET);
+				blink_state = 1;
+			} else {
+				HAL_GPIO_WritePin(GPIOA, GREEN_1_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GPIOA, GREEN_2_Pin, GPIO_PIN_RESET);
+				blink_state = 0;
+			}
+
+			setTimer1(500+cnt);
+		}
+		check_button();
+		break;
 	default: break;
 	}
 }

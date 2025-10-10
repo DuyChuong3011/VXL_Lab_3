@@ -1,6 +1,6 @@
 fsm.c:12:6:setTrafficLED	24	static
 fsm.c:22:6:display7segment	32	static
 fsm.c:52:6:enterState	32	static
-fsm.c:63:6:check_button	8	static
-fsm.c:70:6:mode_normal	32	static
-fsm.c:132:6:fsm_auto_2way_run	16	static
+fsm.c:63:6:check_button	16	static
+fsm.c:82:6:mode_normal	32	static
+fsm.c:144:6:fsm_auto_2way_run	16	static

@@ -60,11 +60,23 @@ void enterState(int new_state, int t1, int t2,
     setTimer1(1000); // 1 giây
 }
 
-void check_button(){
-	if(isButtonPressed()){
-		mode = MODE_1 + flag;
-		flag = (flag+1)%2;
-	}
+void check_button() {
+    int button_event = isButtonPressed();
+    switch (button_event) {
+        case 1:
+            // Xử lý khi button 1 được nhấn
+            mode = MODE_1 + flag;
+            flag = (flag + 1) % 2;
+            break;
+        case 2:
+            // Xử lý khi button 2 được nhấn
+            cnt++;
+            if (cnt > 99) cnt = 0;
+            break;
+        default:
+            // Không có nút nào được nhấn, không làm gì cả
+            break;
+    }
 }
 
 void mode_normal(){
@@ -145,11 +157,11 @@ void fsm_auto_2way_run() {
 		    blink_state = 0;     // 0 = RED1 sáng, RED2 tắt
 		    mode2_init = 0;      // không reset lại nữa
 		    setTimer1(500);      // 0.5s để tạo tần số 2Hz
-		    display7segment(cnt%10, 0);
-		    display7segment(cnt/10, 1);
 		}
 
 		if (timer1_flag) {
+			display7segment(cnt%10, 0);
+			display7segment(cnt/10, 1);
 		    if (blink_state == 0) {
 		        // RED1 sáng, RED2 tắt
 		        HAL_GPIO_WritePin(GPIOA, RED_1_Pin, GPIO_PIN_RESET);

@@ -151,7 +151,7 @@ void check_button() {
 
             // --- Ràng buộc thời gian (r_time = g_time + y_time) ---
             if (mode == MODE_2) {
-                // Set r_time -> Tinh lai y_time hoac g_time. Ta chon tinh lai y_time
+                // Set r_time -> Tinh lai y_time hoac g_time. Ta chon tinh lai g_time
                 g_time = r_time - y_time;
                 if (y_time < 1) {
                     y_time = 1;

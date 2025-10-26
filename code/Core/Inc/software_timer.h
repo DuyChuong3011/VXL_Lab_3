@@ -1,6 +1,10 @@
 #ifndef INC_SOFTWARE_TIMER_H_
 #define INC_SOFTWARE_TIMER_H_
 
+extern int timer1_cnt;
+extern int timer2_cnt;
+extern int timer3_cnt;
+
 extern int timer1_flag;
 extern int timer2_flag;
 extern int timer3_flag;

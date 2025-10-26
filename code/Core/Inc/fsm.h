@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "button.h"
+#include "main.h"
 
 void fsm_auto_2way_run();
 

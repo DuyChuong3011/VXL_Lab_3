@@ -10,7 +10,7 @@ static int led1_time = 0;
 static int led2_time = 0;
 static int r_time = 15; // Thoi gian Do mac dinh
 static int g_time = 12; // Thoi gian Xanh mac dinh
-static int y_time= 3; // Thoi gian Vang mac dinh
+static int y_time= 5; // Thoi gian Vang mac dinh
 static int idx = 0; // Bien quet, luon phien 0 -> 1 -> 2 -> 3
 
 // Bien cho Mode 2, 3, 4
@@ -26,7 +26,6 @@ static int next_mode = MODE_2; // Bien tam de xac dinh mode tiep theo khi nhan B
 void display7SEG(int num) {
     char segNumber[10] = {0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0x80, 0x90};
     for (int i = 0; i < 7; ++i) {
-        // Chi ghi ra Port B (PB0-PB6)
         HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 << i, (segNumber[num] >> i) & 1);
     }
 }
@@ -173,9 +172,19 @@ void check_button() {
     }
 }
 
+int checkErrorTraffic(){
+	return ((r_time <0) | (g_time <0) | (y_time <0) |
+		(r_time >99) | (g_time >99) | (y_time >99) | (r_time != g_time+ y_time));
+}
+
 // --- LOGIC CÁC MODE ---
 
 void normal_mode() {
+	if(checkErrorTraffic()){
+		r_time = 5;
+		g_time = 3;
+		y_time = 2;
+	}
     if (timer1_flag) {
         // Giam thoi gian moi giay
         if (led1_time > 0) led1_time--;
